@@ -7,12 +7,12 @@ using namespace std;
 
 struct node {
 	char c = '$';
-	double val=0;
-	node *left = NULL;
-	node *right = NULL;
+	double val = 0;
+	node* left = NULL;
+	node* right = NULL;
 
-	node(char c, double val):c(c), val(val), left(NULL),right(NULL){}
-	node():c('$'), val(0), left(NULL), right(NULL){}
+	node(char c, double val) :c(c), val(val), left(NULL), right(NULL) {}
+	node() :c('$'), val(0), left(NULL), right(NULL) {}
 
 };
 
@@ -27,8 +27,8 @@ map <string, char > InverseDic;
 //this function aims to build both dictionary and inverse dictionary
 void HuffmanRec(node n, string code = "") {
 	if (n.c == '$') {
-		HuffmanRec(*n.left, code + "0");
-		HuffmanRec(*n.right, code + "1");
+		HuffmanRec(*n.left, code + "1");
+		HuffmanRec(*n.right, code + "0");
 	}
 	else
 	{
@@ -60,14 +60,14 @@ int main() {
 	map<char, double> prob;
 
 	int TotalNoChars = 0;     // total number of characters in file
-	char CurrentChar;       
+	char CurrentChar;
 
 	//while there're characters in file, increase count
 	while (IpFileObj.get(CurrentChar)) {
 		TotalNoChars++;
 		prob[CurrentChar]++;
 	}
-	
+
 	//after reading we don't need file anymore
 	IpFileObj.close();
 
@@ -80,25 +80,19 @@ int main() {
 	//priority queue for nodes
 
 	priority_queue<node, vector<node>, OrderByValue> pq;
-	
+
 	node* n;    //template
-	
+
 	//push each char with it's probability
-    map<char, double>::iterator it;
+	map<char, double>::iterator it;
 	for (it = prob.begin(); it != prob.end(); it++) {
 		it->second /= TotalNoChars;
-		n = new node(it->first,it->second);
+		n = new node(it->first, it->second);
 		pq.push(*n);
 	}
-	
-	//special case
-	if(pq.size() == 1){
-		cout << "Same character in file, Doesn't need to be compressed";
-		return 0;
-	}
 
-    //templates
-	node *n1, *n2;
+	//templates
+	node* n1, * n2;
 
 	//generating tree
 	while (pq.size() > 1) {
@@ -115,7 +109,12 @@ int main() {
 
 	node head = pq.top();
 	pq.pop();
-	HuffmanRec(head);
+	if (prob.size() > 1) {
+		HuffmanRec(head);
+	}
+	else {
+		HuffmanRec(head, "0");
+	}
 
 	//cout << endl;
 	//map<char, string>::iterator it2;
@@ -141,7 +140,7 @@ int main() {
 	//out decoded binary for each correspoding character in input file
 	IpFileObj.open("input.txt");  //to read input as chars
 	ofstream binEncodedFile("Encoded.bin", ios::out | ios::binary);   //to out encoded chars as binary
-	
+
 	string CurrentCode = "";
 
 	while (IpFileObj.get(CurrentChar)) {
@@ -154,26 +153,26 @@ int main() {
 				binEncodedFile << 0;
 		}
 	}
-    
+
 	IpFileObj.close();
 	binEncodedFile.close();
 
-//----------------------------End of Encoding-----------------------//
+	//----------------------------End of Encoding-----------------------//
 
-//------------------------------------------------------------------//
-	
-	
-	
+	//------------------------------------------------------------------//
+
+
+
 	ifstream EncodedFile("Encoded.bin", ios::in | ios::binary);
-	
+
 	ofstream Decoded_File("Decoded.txt", ios::out | ios::trunc);   //create a new file to store decoded characters
 
-	string x="";     //temp for current string of binary code
+	string x = "";     //temp for current string of binary code
 	int CurrentBit = 0;
-	while(EncodedFile.get(CurrentChar)){
+	while (EncodedFile.get(CurrentChar)) {
 		x += CurrentChar;                   //concatinate bits
 		char decoded = searchInDic(x);     //check if exixts
-		if (decoded != '$'){              
+		if (decoded != '$') {
 			Decoded_File << decoded;       //if exists, then print in output file
 			x = "";                       //emptying x
 		}
