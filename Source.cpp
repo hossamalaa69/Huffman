@@ -139,29 +139,38 @@ int main() {
 
 
 	//out decoded binary for each correspoding character in input file
-	IpFileObj.open("input.txt");
-	ofstream encBinary("Encoded-Binary.txt", ios::out | ios::trunc);
+	IpFileObj.open("input.txt");  //to read input as chars
+	ofstream binEncodedFile("Encoded.bin", ios::out | ios::binary);   //to out encoded chars as binary
+	
+	string CurrentCode = "";
+
 	while (IpFileObj.get(CurrentChar)) {
-		encBinary << Dictionary[CurrentChar];
+		CurrentCode = Dictionary[CurrentChar];
+		for (size_t i = 0; i < CurrentCode.length(); i++)
+		{
+			if (CurrentCode[i] == '1')
+				binEncodedFile << 1;
+			else
+				binEncodedFile << 0;
+		}
 	}
     
 	IpFileObj.close();
-	encBinary.close();
+	binEncodedFile.close();
 
 //----------------------------End of Encoding-----------------------//
 
 //------------------------------------------------------------------//
 	
 	
-	ifstream inBinary;
-	inBinary.open("Encoded-Binary.txt");    //open file as input 
 	
-
-
-	ofstream Decoded_File("Decoded_File.txt", ios::out | ios::trunc);   //create a new file to store decoded characters
+	ifstream EncodedFile("Encoded.bin", ios::in | ios::binary);
 	
+	ofstream Decoded_File("Decoded.txt", ios::out | ios::trunc);   //create a new file to store decoded characters
+
 	string x="";     //temp for current string of binary code
-	while(inBinary.get(CurrentChar)){
+	int CurrentBit = 0;
+	while(EncodedFile.get(CurrentChar)){
 		x += CurrentChar;                   //concatinate bits
 		char decoded = searchInDic(x);     //check if exixts
 		if (decoded != '$'){              
@@ -170,7 +179,8 @@ int main() {
 		}
 	}
 
-	inBinary.close();
+	EncodedFile.close();
 	Decoded_File.close();
+
 	return 0;
 }
