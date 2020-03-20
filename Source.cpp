@@ -73,18 +73,18 @@ char searchInDic(string x) {
 }
 
 string getBinary(int a) {
-	string s = "";
+	string s = "";    //store 8 bits binary of char
 	if (a < 0)
-		a += 256;
+		a += 256;          //if ascii code is nagative
 	while (a != 0) {
-		s += ((a % 2) + 48);
+		s += ((a % 2) + 48);   
 		a >>= 1;
 	}
-	while (s.length() != 8) {
-		//string s2 = s;
+	while (s.length() != 8) {   //if code length <8 , then fill MSB by zeros to be 8 bits
 		s += "0";
 	}
-	string reflectS = "";
+
+	string reflectS = "";     //rotate string to be in form of binary
 
 	for (int i = 7; i >= 0; i--)
 		reflectS += s[i];
@@ -191,36 +191,48 @@ int main() {
 	ofstream binEncodedFile("Encoded.bin", ios::out | ios::binary);   //to out encoded chars as binary
 	binEncodedFile.clear();
 	//Making coded string
-	string Code = "";
-	while (IpFileObj.get(CurrentChar))
-		Code += Dictionary[CurrentChar];
+	char* Code = new char[ConstSize];
+	long int index = 0;
+	while (IpFileObj.get(CurrentChar)) {
+		for (int i = 0; i < Dictionary[CurrentChar].size(); i++) {
+			Code[index] = Dictionary[CurrentChar][i];
+			index++;
+		}
+	}
 	//adding EOF code
-	Code += Dictionary[EndOfFile];
-
+	for (int i = 0; i < Dictionary[EndOfFile].size(); i++) {
+		Code[index] = Dictionary[EndOfFile][i];
+		index++;
+	}
 	//Outing in binary file
 	//dividing code into blocks of 8bits(bytes) to be stored in file
 	string CurrentBlock;
-	string EncodedBlock = "";
+	char* EncodedBlock = new char[ConstSize];
+	long int EBix = 0;
 	int ix = 0;
-	int CodeLen = Code.size();
+	int CodeLen = index;
 	char EncodedVal;
-	bool EndReached = false;
-
 	while (ix < CodeLen) {
+		CurrentBlock = "";
 		if (CodeLen - ix >= 8) {
-			CurrentBlock = Code.substr(ix, 8);
-			ix += 8;
+			for (int i = 0; i < 8; i++) {
+				CurrentBlock += Code[ix];
+				ix++;
+			}
 		}
 		else {
-			CurrentBlock = Code.substr(ix, CodeLen - ix);
-			ix = CodeLen;
+			int dummy = ix;
+			for (int i = 0; i < CodeLen - dummy; i++) {
+				CurrentBlock += Code[ix];
+				ix++;
+			}
 		}
 		Encode2Binary(CurrentBlock, EncodedVal);
-		EncodedBlock += EncodedVal;
-
+		EncodedBlock[EBix] = EncodedVal;
+		EBix++;
 	}
 	ix = 0;
-	int EncBlockSz = EncodedBlock.size();
+	int EncBlockSz = EBix;
 	while (ix < EncBlockSz) {
 		binEncodedFile << EncodedBlock[ix];
 		ix++;
@@ -242,10 +254,11 @@ int main() {
 	ofstream Decoded_File("Decoded.txt", ios::out | ios::trunc);   //create a new file to store decoded characters
 	Decoded_File.clear();
 
+	//store all chars in encoded file
 	char* AllBinary = new char[ConstSize];
-	long int count = 0;
+	long int count = 0;    //count of chars
 	while (EncodedFile.get(CurrentChar)) {
-		string binaryOfChar = getBinary((int)CurrentChar);
+		string binaryOfChar = getBinary((int)CurrentChar);     //store binary of each char
 		for (int i = 0; i < 8; i++) {
 			AllBinary[count] = binaryOfChar[i];
 			count++;
